@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rekap Money V.1.1</title>
+  <style>
+    :root {
+      --bg: #f4f6fa;
+      --text: #000;
+      --card-bg: #fff;
+      --table-header: #0077cc;
+    }
+    body.dark {
+      --bg: #1e1e2f;
+      --text: #f1f1f1;
+      --card-bg: #2b2b3c;
+      --table-header: #005999;
+    }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      transition: all 0.3s ease;
+    }
+    header {
+      background: var(--table-header);
+      color: white;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .menu-toggle {
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+    nav {
+      position: absolute;
+      top: 60px;
+      left: 0;
+      width: 100%;
+      background: var(--card-bg);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      display: none;
+      z-index: 999;
+    }
+    nav a {
+      display: block;
+      padding: 1rem;
+      text-decoration: none;
+      color: var(--text);
+      border-bottom: 1px solid #ccc;
+    }
+    nav a:hover {
+      background: #e6f0ff;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 2rem;
+    }
+    h2 { margin-top: 0.5rem; }
+    button {
+      padding: 8px 14px;
+      margin: 6px 6px 6px 0;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-income { background: #2ecc71; color: white; }
+    .btn-expense { background: #e74c3c; color: white; }
+    .btn-usaha { background: #8e44ad; color: white; }
+    .btn-toggle { background: #333; color: #fff; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 14px;
+    }
+    th {
+      background-color: var(--table-header);
+      color: white;
+      padding: 10px;
+    }
+    td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #eee;
+    }
+    tr.income-row { background-color: #e8fdf1; }
+    tr.expense-row { background-color: #fde8e8; }
+    tr.usaha-row { background-color: #f2e8fd; }
+    tr:hover { background: #f2faff; }
+    input[type="text"], input[type="number"], select {
+      padding: 6px;
+      width: 90%;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .floating-refresh {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #0077cc;
+      color: white;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      z-index: 999;
+    }
+    .hidden { display: none; }
+    .welcome {
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+    .welcome h1 {
+      font-size: 2.2rem;
+    }
+    .welcome p {
+      font-size: 1.2rem;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span><strong></strong> Rekap Money V.1.1</span>
+    <button class="btn-toggle" onclick="toggleDarkMode()">🌙</button>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+  </header>
+  <nav id="menu">
+    <a href="#" onclick="showPage('beranda')">🏠 Beranda</a>
+    <a href="#" onclick="showPage('utama')">📒 Transaksi Utama</a>
+    <a href="#" onclick="showPage('usaha')">📘 Transaksi Usaha</a>
+    <a href="#" onclick="showPage('pemberitahuan')">🔔 Pemberitahuan</a>
+  </nav>
+
+  <div class="container">
+    <!-- Halaman Pembuka -->
+    <section id="beranda" class="">
+      <div class="welcome">
+        <h1>Selamat Datang di Rekap Money RT/RW Net</h1>
+        <p>Semoga hari-harimu dipenuhi rezeki dan pencatatanmu semakin rapi.</p>
+        <p>Terima kasih telah menggunakan aplikasi ini </p>
+      </div>
+    </section>
+
+    <!-- Halaman Transaksi Utama -->
+    <section id="utama" class="hidden">
+      <h2>Transaksi Utama</h2>
+      <button class="btn-income" onclick="showForm('utama')">+ Tambah Transaksi Utama</button>
+      <div id="balanceUtama">Saldo: Rp 0</div>
+      <table>
+        <thead>
+          <tr>
+            <th>No</th><th>ID</th><th>Jenis</th><th>Kategori</th><th>Deskripsi</th><th>Jumlah</th><th>Sisa Saldo</th><th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableUtama"></tbody>
+      </table>
+    </section>
+
+    <!-- Halaman Transaksi Usaha -->
+    <section id="usaha" class="hidden">
+      <h2>Transaksi Usaha</h2>
+      <button class="btn-usaha" onclick="showForm('usaha')">+ Tambah Transaksi Usaha</button>
+      <div id="balanceUsaha">Saldo: Rp 0</div>
+      <table>
+        <thead>
+          <tr>
+            <th>No</th><th>ID</th><th>Jenis</th><th>Kategori</th><th>Deskripsi</th><th>Jumlah</th><th>Sisa Saldo</th><th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableUsaha"></tbody>
+      </table>
+    </section>
+
+    <!-- Halaman Pemberitahuan -->
+    <section id="pemberitahuan" class="hidden">
+      <h2>📢 Pemberitahuan</h2>
+      <ul>
+        <li>✔️ Versi 1.1 mendukung dark mode dan data lokal.</li>
+        <li>✔️ Transaksi dipisah antar usaha & utama.</li>
+        <li>✔️ Navigasi menggunakan hamburger menu.</li>
+        <li>✔️ Halaman selamat datang ditambahkan.</li>
+      </ul>
+    </section>
+  </div>
+
+  <button class="floating-refresh" onclick="refreshAll()">🔄 Refresh</button>
+
+  <script>
+    let transaksiUtama = JSON.parse(localStorage.getItem("utama") || "[]");
+    let transaksiUsaha = JSON.parse(localStorage.getItem("usaha") || "[]");
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark");
+    }
+
+    function toggleMenu() {
+      const menu = document.getElementById("menu");
+      menu.style.display = (menu.style.display === "block") ? "none" : "block";
+    }
+
+    function showPage(id) {
+      ["beranda", "utama", "usaha", "pemberitahuan"].forEach(p => {
+        document.getElementById(p).classList.add("hidden");
+      });
+      document.getElementById(id).classList.remove("hidden");
+      document.getElementById("menu").style.display = "none";
+    }
+
+    // ... fungsi `render`, `showForm`, `simpan`, `edit`, `simpanEdit`, `hapus`, dan `refreshAll` tetap seperti pada versi sebelumnya ...
+
+    function render(type = 'utama') {
+      const data = type === 'utama' ? transaksiUtama : transaksiUsaha;
+      const tbody = document.getElementById(type === 'utama' ? "tableUtama" : "tableUsaha");
+      const saldoBox = document.getElementById(type === 'utama' ? "balanceUtama" : "balanceUsaha");
+      tbody.innerHTML = "";
+      let saldo = 0;
+
+      data.forEach((tr, i) => {
+        const row = document.createElement("tr");
+        row.className = tr.type === "Pemasukan" ? "income-row" : (type === 'usaha' ? "usaha-row" : "expense-row");
+        saldo += tr.type === "Pemasukan" ? tr.amount : -tr.amount;
+        tr.sisa = saldo;
+
+        row.innerHTML = `
+          <td>${i + 1}</td>
+          <td>${tr.id}</td>
+          <td>${tr.type}</td>
+          <td>${tr.kategori}</td>
+          <td>${tr.deskripsi}</td>
+          <td>Rp ${tr.amount.toLocaleString()}</td>
+          <td>Rp ${tr.sisa.toLocaleString()}</td>
+          <td>
+            <button onclick="edit(${i}, '${type}')">Edit</button>
+            <button onclick="hapus(${i}, '${type}')">Hapus</button>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+
+      saldoBox.textContent = `Saldo: Rp ${saldo.toLocaleString()}`;
+    }
+
+    function showForm(type) {
+      const tbody = document.getElementById(type === 'utama' ? "tableUtama" : "tableUsaha");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>#</td>
+        <td>Auto</td>
+        <td>
+          <select id="jenis-${type}">
+            <option value="Pemasukan">Pemasukan</option>
+            <option value="Pengeluaran">Pengeluaran</option>
+          </select>
+        </td>
+        <td>
+          <select id="kategori-${type}">
+            <option value="">-- Pilih --</option>
+            <option>Belanja</option>
+            <option>Gaji</option>
+            <option>Internet</option>
+            <option>Operasional</option>
+            <option>Lainnya</option>
+          </select>
+        </td>
+        <td><input type="text" id="deskripsi-${type}" placeholder="Deskripsi"></td>
+        <td><input type="number" id="jumlah-${type}" placeholder="Jumlah"></td>
+        <td>-</td>
+        <td>
+          <button onclick="simpan('${type}')">Simpan</button>
+          <button onclick="render('${type}')">Batal</button>
+        </td>
+      `;
+      tbody.prepend(row);
+    }
+
+    function simpan(type) {
+      const jenis = document.getElementById(`jenis-${type}`).value;
+      const kategori = document.getElementById(`kategori-${type}`).value;
+      const deskripsi = document.getElementById(`deskripsi-${type}`).value;
+      const jumlah = parseFloat(document.getElementById(`jumlah-${type}`).value);
+      if (!kategori || !deskripsi || isNaN(jumlah)) return alert("Lengkapi semua!");
+
+      const now = new Date();
+      const pad = (n) => n.toString().padStart(2, '0');
+      const waktu = `${pad(now.getDate())}${pad(now.getMonth()+1)}${pad(now.getHours())}${pad(now.getMinutes())}`;
+      let id = "";
+
+      if (type === 'utama') {
+        const kat = kategori.toLowerCase();
+        if (kat === "belanja") id = "BLNJ" + waktu;
+        else if (kat === "gaji") id = "GAJI" + waktu;
+        else if (kat === "internet") id = "INT" + waktu;
+        else if (kat === "operasional") id = "OPR" + waktu;
+        else id = "UTM" + Date.now();
+      } else {
+        id = "INP" + waktu;
+      }
+
+      const transaksi = { id, type: jenis, kategori, deskripsi, amount: jumlah };
+      const list = type === 'utama' ? transaksiUtama : transaksiUsaha;
+      list.unshift(transaksi);
+      localStorage.setItem(type, JSON.stringify(list));
+      render(type);
+    }
+
+    function edit(index, type) {
+      const list = type === 'utama' ? transaksiUtama : transaksiUsaha;
+      const tr = list[index];
+      const tbody = document.getElementById(type === 'utama' ? "tableUtama" : "tableUsaha");
+      tbody.innerHTML = "";
+      list.forEach((item, i) => {
+        const row = document.createElement("tr");
+        if (i === index) {
+          row.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${item.id}</td>
+            <td>
+              <select id="edit-jenis">
+                <option value="Pemasukan" ${item.type === 'Pemasukan' ? 'selected' : ''}>Pemasukan</option>
+                <option value="Pengeluaran" ${item.type === 'Pengeluaran' ? 'selected' : ''}>Pengeluaran</option>
+              </select>
+            </td>
+            <td><input type="text" id="edit-kategori" value="${item.kategori}"></td>
+            <td><input type="text" id="edit-deskripsi" value="${item.deskripsi}"></td>
+            <td><input type="number" id="edit-jumlah" value="${item.amount}"></td>
+            <td>-</td>
+            <td>
+              <button onclick="simpanEdit(${i}, '${type}')">Simpan</button>
+              <button onclick="render('${type}')">Batal</button>
+            </td>
+          `;
+        } else {
+          row.innerHTML = `
+            <td>${i + 1}</td>
+            <td>${item.id}</td>
+            <td>${item.type}</td>
+            <td>${item.kategori}</td>
+            <td>${item.deskripsi}</td>
+            <td>Rp ${item.amount.toLocaleString()}</td>
+            <td>Rp ${item.sisa?.toLocaleString() || '-'}</td>
+            <td>
+              <button onclick="edit(${i}, '${type}')">Edit</button>
+              <button onclick="hapus(${i}, '${type}')">Hapus</button>
+            </td>
+          `;
+        }
+        tbody.appendChild(row);
+      });
+    }
+
+    function simpanEdit(index, type) {
+      const jenis = document.getElementById("edit-jenis").value;
+      const kategori = document.getElementById("edit-kategori").value;
+      const deskripsi = document.getElementById("edit-deskripsi").value;
+      const jumlah = parseFloat(document.getElementById("edit-jumlah").value);
+      if (!kategori || !deskripsi || isNaN(jumlah)) return alert("Lengkapi semua!");
+
+      const list = type === 'utama' ? transaksiUtama : transaksiUsaha;
+      list[index].type = jenis;
+      list[index].kategori = kategori;
+      list[index].deskripsi = deskripsi;
+      list[index].amount = jumlah;
+      localStorage.setItem(type, JSON.stringify(list));
+      render(type);
+    }
+
+    function hapus(index, type) {
+      if (confirm("Hapus transaksi ini?")) {
+        const list = type === 'utama' ? transaksiUtama : transaksiUsaha;
+        list.splice(index, 1);
+        localStorage.setItem(type, JSON.stringify(list));
+        render(type);
+      }
+    }
+
+    function refreshAll() {
+      render('utama');
+      render('usaha');
+    }
+
+    refreshAll();
+  </script>
+</body>
+</html>
